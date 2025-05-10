@@ -102,6 +102,26 @@ export default class Users extends BaseModel {
                     type: DataTypes.INTEGER(3),
                     allowNull: false,
                     defaultValue: 0
+                },
+                stampbookColor: {
+                    type: DataTypes.INTEGER(4),
+                    allowNull: false,
+                    defaultValue: 1
+                },
+                stampbookPattern: {
+                    type: DataTypes.INTEGER(4),
+                    allowNull: false,
+                    defaultValue: 1
+                },
+                stampbookHighlight: {
+                    type: DataTypes.INTEGER(4),
+                    allowNull: false,
+                    defaultValue: 1
+                },
+                stampbookClasp: {
+                    type: DataTypes.INTEGER(4),
+                    allowNull: false,
+                    defaultValue: 1
                 }
             },
             { sequelize, timestamps: false, tableName: 'users' }
@@ -154,6 +174,10 @@ export default class Users extends BaseModel {
         this.hasMany(db.pets, {
             foreignKey: 'userId',
             as: 'pets'
+        })
+        this.hasMany(db.stamps, {
+            foreignKey: 'userId',
+            as: 'stamps'
         })
     }
 

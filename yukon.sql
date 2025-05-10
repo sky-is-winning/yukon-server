@@ -118,7 +118,11 @@ CREATE TABLE `users` (
   `photo` int(11) NOT NULL DEFAULT 0,
   `flag` int(11) NOT NULL DEFAULT 0,
   `ninjaRank` tinyint(1) NOT NULL DEFAULT 0,
-  `ninjaProgress` tinyint(3) NOT NULL DEFAULT 0
+  `ninjaProgress` tinyint(3) NOT NULL DEFAULT 0,
+  `stampbookColor` TINYINT(4) NOT NULL DEFAULT 1,
+  `stampbookPattern` TINYINT(4) NOT NULL DEFAULT 0,
+  `stampbookHighlight` TINYINT(4) NOT NULL DEFAULT 1,
+  `stampbookClasp` TINYINT(4) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Users';
 DELIMITER $$
 CREATE TRIGGER `trigger_users_insert` AFTER INSERT ON `users` FOR EACH ROW BEGIN
@@ -137,6 +141,10 @@ CREATE TABLE `worlds` (
 INSERT INTO `worlds` (`id`, `population`) VALUES
 ('Blizzard', 0);
 
+CREATE TABLE `stamps` (
+	`userId` INT(11) NOT NULL,
+	`stampId` INT(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='User owned stamps';
 
 ALTER TABLE `auth_tokens`
   ADD PRIMARY KEY (`userId`,`selector`) USING BTREE;
@@ -247,6 +255,11 @@ ALTER TABLE `pets`
 ALTER TABLE `postcards`
   ADD CONSTRAINT `postcards_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `postcards_ibfk_2` FOREIGN KEY (`senderId`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `stamps`
+	ADD PRIMARY KEY (`userId`, `stampId`) USING BTREE,
+	ADD CONSTRAINT `stamps_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON UPDATE CASCADE ON DELETE CASCADE;
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
