@@ -48,7 +48,7 @@ export default class Get extends GamePlugin {
 
         if (args.id in this.usersById) {
             let u = this.usersById[args.id]
-            user.send('get_stampbook_data', { stamps: u.stamps, color: u.stampbookColor, pattern: u.stampbookPattern, highlight: u.stampbookHighlight, clasp: u.stampbookClasp, nickname: u.username })
+            user.send('get_stampbook_data', { stamps: u.stamps, color: u.stampbookColor, pattern: u.stampbookPattern, highlight: u.stampbookHighlight, clasp: u.stampbookClasp, nickname: u.username, penguinColor: u.color })
             return
         }
 
@@ -56,7 +56,7 @@ export default class Get extends GamePlugin {
         let stamps = await this.db.getUserStamps(args.id)
 
         if (u) {
-            user.send('get_stampbook_data', { stamps, color: u.stampbookColor, pattern: u.stampbookPattern, highlight: u.stampbookHighlight, clasp: u.stampbookClasp, nickname: u.username })
+            user.send('get_stampbook_data', { stamps, color: u.stampbookColor, pattern: u.stampbookPattern, highlight: u.stampbookHighlight, clasp: u.stampbookClasp, nickname: u.username, penguinColor: u.color })
         }
     }
 
