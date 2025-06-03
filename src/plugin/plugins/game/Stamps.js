@@ -16,6 +16,8 @@ export default class Stamps extends GamePlugin {
             return
         }
 
+        args.id = parseInt(args.id)
+
         if (!this.crumbs.stamps.some(category =>
             category.stamps.some(stamp =>
                 stamp.stamp_id == args.id)
