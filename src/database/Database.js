@@ -19,7 +19,7 @@ export default class Database {
         )
 
         // Used to translate type id to string
-        this.slots = [ 'color', 'head', 'face', 'neck', 'body', 'hand', 'feet', 'flag', 'photo', 'award' ]
+        this.slots = ['color', 'head', 'face', 'neck', 'body', 'hand', 'feet', 'flag', 'photo', 'award']
 
         this.dir = `${__dirname}/models`
 
@@ -149,6 +149,29 @@ export default class Database {
         return await this.findAll('stamps', {
             where: { userId: userId }
         })
+    }
+
+    async getCoverStamps(userId) {
+        return await this.findAll('coverStamps', {
+            where: { userId: userId },
+            raw: true
+        })
+    }
+
+    async setCoverStamps(userId, cover) {
+        await this.coverStamps.destroy({
+            where: { userId: userId }
+        })
+
+        for (let stamp of cover) {
+            await this.coverStamps.create({
+                userId: userId,
+                stampId: stamp.id,
+                type: stamp.type || 'stamp', // Default to 'stamp' if type is not provided
+                x: stamp.x,
+                y: stamp.y
+            })
+        }
     }
 
     /*========== Helper functions ==========*/

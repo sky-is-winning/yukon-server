@@ -46,9 +46,11 @@ export default class Get extends GamePlugin {
             return
         }
 
+        let cover = await this.db.getCoverStamps(args.id)
+
         if (args.id in this.usersById) {
             let u = this.usersById[args.id]
-            user.send('get_stampbook_data', { stamps: u.stamps, color: u.stampbookColor, pattern: u.stampbookPattern, highlight: u.stampbookHighlight, clasp: u.stampbookClasp, nickname: u.username, penguinColor: u.color })
+            user.send('get_stampbook_data', { stamps: u.stamps, color: u.stampbookColor, pattern: u.stampbookPattern, highlight: u.stampbookHighlight, clasp: u.stampbookClasp, nickname: u.username, penguinColor: u.color, cover: cover.map(stamp => ({ id: stamp.stampId, x: stamp.x, y: stamp.y, type: stamp.type })) })
             return
         }
 
@@ -56,7 +58,7 @@ export default class Get extends GamePlugin {
         let stamps = await this.db.getUserStamps(args.id)
 
         if (u) {
-            user.send('get_stampbook_data', { stamps, color: u.stampbookColor, pattern: u.stampbookPattern, highlight: u.stampbookHighlight, clasp: u.stampbookClasp, nickname: u.username, penguinColor: u.color })
+            user.send('get_stampbook_data', { stamps, color: u.stampbookColor, pattern: u.stampbookPattern, highlight: u.stampbookHighlight, clasp: u.stampbookClasp, nickname: u.username, penguinColor: u.color, cover: cover.map(stamp => ({ id: stamp.stampId, x: stamp.x, y: stamp.y, type: stamp.type })) })
         }
     }
 

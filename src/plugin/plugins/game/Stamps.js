@@ -41,8 +41,16 @@ export default class Stamps extends GamePlugin {
 
         const update = {}
         Object.keys(args).forEach(key => {
+            if (!['color', 'pattern', 'highlight', 'clasp'].includes(key)) {
+                return
+            }
+
             update[`stampbook${key.charAt(0).toUpperCase() + key.slice(1)}`] = args[key]
         })
+
+        if (args.cover) {
+            this.db.setCoverStamps(user.id, args.cover)
+        }
 
         user.update(update)
     }

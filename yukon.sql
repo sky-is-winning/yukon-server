@@ -146,6 +146,14 @@ CREATE TABLE `stamps` (
 	`stampId` INT(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='User owned stamps';
 
+CREATE TABLE `cover_stamps` (
+  `userId` int(11) NOT NULL,
+  `stampId` int(11) NOT NULL,
+  `type` varchar(12) NOT NULL DEFAULT 'stamp',
+  `x` smallint(6) NOT NULL DEFAULT 0,
+  `y` smallint(6) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='User stampbook cover stamps';
+
 ALTER TABLE `auth_tokens`
   ADD PRIMARY KEY (`userId`,`selector`) USING BTREE;
 
@@ -198,6 +206,9 @@ ALTER TABLE `users`
 ALTER TABLE `worlds`
   ADD PRIMARY KEY (`id`);
 
+ALTER TABLE `cover_stamps`
+  ADD PRIMARY KEY (`userId`,`stampId`) USING BTREE,
+  ADD KEY `cover_stamps_ibfk_1` (`userId`);
 
 ALTER TABLE `bans`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
@@ -259,6 +270,9 @@ ALTER TABLE `postcards`
 ALTER TABLE `stamps`
 	ADD PRIMARY KEY (`userId`, `stampId`) USING BTREE,
 	ADD CONSTRAINT `stamps_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE `cover_stamps`
+  ADD CONSTRAINT `cover_stamps_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 COMMIT;
 
