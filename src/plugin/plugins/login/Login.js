@@ -185,12 +185,13 @@ export default class Login extends Plugin {
         // Generate random key, used by client for authentication
         let randomKey = crypto.randomBytes(32).toString('hex')
         // Generate new login key, used to validate user on game server
-        user.loginKey = await this.genLoginKey(user, randomKey)
+        let loginKey = await this.genLoginKey(user, randomKey)
 
         let populations = await this.getWorldPopulations(user.isModerator)
 
         // All validation passed
-        await user.save()
+        await user.update({ loginKey })
+
         return {
             success: true,
             username: user.username,

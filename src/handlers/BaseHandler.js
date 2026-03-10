@@ -36,6 +36,10 @@ export default class BaseHandler {
                 return user.close()
             }
 
+            if (message.action in this.config.cooldowns) {
+                this.setCooldown(message, user)
+            }
+
             this.events.emit(message.action, message.args, user)
 
             if (user.events) {
@@ -49,6 +53,25 @@ export default class BaseHandler {
 
     handleGuard(message, user) {
         return false
+    }
+
+    setCooldown({ action }, user) {
+        user.cooldowns[action] = Date.now()
+    }
+
+    isOnCooldown({ action }, user) {
+        if (!(action in this.config.cooldowns)) {
+            return false
+        }
+
+        if (!(action in user.cooldowns)) {
+            return false
+        }
+
+        const cooldown = this.config.cooldowns[action]
+        const lastUsed = user.cooldowns[action]
+
+        return Date.now() - lastUsed < cooldown
     }
 
     close(user) {

@@ -1,4 +1,4 @@
-import UserMixin from './UserMixin'
+import User from './User'
 
 import pick from '@utils/pick'
 import { isInRange } from '@utils/validation'
@@ -19,10 +19,10 @@ import EventEmitter from 'events'
 import { Op } from 'sequelize'
 
 
-const GameUserMixin = {
+export default class GameUser extends User {
 
-    init(server, socket) {
-        super.init(server, socket)
+    constructor(server, socket) {
+        super(server, socket)
 
         this.crumbs = this.handler.crumbs
 
@@ -51,11 +51,11 @@ const GameUserMixin = {
         this.events.on('error', (error) => {
             this.handler.error(error)
         })
-    },
+    }
 
     inOwnIgloo() {
         return this.room?.isIgloo && this.room?.userId === this.id
-    },
+    }
 
     setItem(slot, item) {
         if (this[slot] == item) {
@@ -64,11 +64,11 @@ const GameUserMixin = {
 
         this.update({ [slot]: item })
         this.sendUpdatePlayer(slot, item)
-    },
+    }
 
     sendUpdatePlayer(slot, item) {
         this.room.send(this, 'update_player', { id: this.id, item: item, slot: slot }, [])
-    },
+    }
 
     joinRoom(room, x = 0, y = 0) {
         if (!room || room === this.room || this.minigameRoom || this.waddle) {
@@ -97,7 +97,7 @@ const GameUserMixin = {
         this.frame = 1
 
         this.room.add(this)
-    },
+    }
 
     joinTable(table) {
         if (table && !this.minigameRoom) {
@@ -105,7 +105,7 @@ const GameUserMixin = {
 
             this.minigameRoom.add(this)
         }
-    },
+    }
 
     addBuddy(id, username, requester = false) {
         this.buddies.add(id)
@@ -113,17 +113,17 @@ const GameUserMixin = {
         let online = id in this.handler.usersById
 
         this.send('buddy_accept', { id: id, username: username, requester: requester, online: online })
-    },
+    }
 
     removeBuddy(id) {
         this.buddies.remove(id)
 
         this.send('buddy_remove', { id: id })
-    },
+    }
 
     clearBuddyRequest(id) {
         this.buddyRequests = this.buddyRequests.filter(request => request != id)
-    },
+    }
 
     updateCoins(coins, gameOver = false) {
         coins = parseInt(coins)
@@ -137,7 +137,7 @@ const GameUserMixin = {
         if (gameOver) {
             this.send('game_over', { coins: coins || this.coins })
         }
-    },
+    }
 
     async addSystemMail(postcardId, details = null) {
         const postcard = await this.postcards.add(null, postcardId, details)
@@ -145,7 +145,7 @@ const GameUserMixin = {
         if (postcard) this.send('receive_mail', postcard)
 
         return postcard
-    },
+    }
 
     async startWalkingPet(petId) {
         if (!this.pets.includes(petId)) return
@@ -168,7 +168,7 @@ const GameUserMixin = {
 
         this.hand = petItemId
         this.sendUpdatePlayer('hand', petItemId)
-    },
+    }
 
     stopWalkingPet() {
         if (this.walkingPet) {
@@ -177,110 +177,117 @@ const GameUserMixin = {
             this.walkingPet.walking = false
             this.walkingPet = null
         }
-    },
+    }
 
     async load(username) {
-        return await this.reload({
-            where: {
-                username: username
-            },
+        try {
+            const user = await this.db.users.findOne({
+                where: {
+                    username
+                },
 
-            include: [
-                {
-                    model: this.db.bans,
-                    as: 'ban',
-                    where: {
-                        expires: {
-                            [Op.gt]: Date.now()
-                        }
+                include: [
+                    {
+                        model: this.db.bans,
+                        as: 'ban',
+                        where: {
+                            expires: {
+                                [Op.gt]: Date.now()
+                            }
+                        },
+                        required: false
                     },
-                    required: false
-                },
-                {
-                    model: this.db.buddies,
-                    as: 'buddies',
-                    include: {
-                        model: this.db.users,
-                        as: 'user',
-                        attributes: ['username']
+                    {
+                        model: this.db.buddies,
+                        as: 'buddies',
+                        include: {
+                            model: this.db.users,
+                            as: 'user',
+                            attributes: ['username']
+                        },
+                        separate: true
                     },
-                    separate: true
-                },
-                {
-                    model: this.db.ignores,
-                    as: 'ignores',
-                    include: {
-                        model: this.db.users,
-                        as: 'user',
-                        attributes: ['username']
+                    {
+                        model: this.db.ignores,
+                        as: 'ignores',
+                        include: {
+                            model: this.db.users,
+                            as: 'user',
+                            attributes: ['username']
+                        },
+                        separate: true
                     },
-                    separate: true
-                },
-                {
-                    model: this.db.inventories,
-                    as: 'inventory',
-                    attributes: ['itemId'],
-                    separate: true
-                },
-                {
-                    model: this.db.iglooInventories,
-                    as: 'igloos',
-                    attributes: ['iglooId'],
-                    separate: true
-                },
-                {
-                    model: this.db.furnitureInventories,
-                    as: 'furniture',
-                    separate: true
-                },
-                {
-                    model: this.db.cards,
-                    as: 'cards',
-                    separate: true
-                },
-                {
-                    model: this.db.postcards,
-                    as: 'postcards',
-                    include: {
-                        model: this.db.users,
-                        as: 'user',
-                        attributes: ['username']
+                    {
+                        model: this.db.inventories,
+                        as: 'inventory',
+                        attributes: ['itemId'],
+                        separate: true
                     },
-                    separate: true
-                },
-                {
-                    model: this.db.pets,
-                    as: 'pets',
-                    separate: true
-                },
-                {
-                    model: this.db.stamps,
-                    as: 'stamps',
-                    separate: true
-                }
-            ]
+                    {
+                        model: this.db.iglooInventories,
+                        as: 'igloos',
+                        attributes: ['iglooId'],
+                        separate: true
+                    },
+                    {
+                        model: this.db.furnitureInventories,
+                        as: 'furniture',
+                        separate: true
+                    },
+                    {
+                        model: this.db.cards,
+                        as: 'cards',
+                        separate: true
+                    },
+                    {
+                        model: this.db.postcards,
+                        as: 'postcards',
+                        include: {
+                            model: this.db.users,
+                            as: 'user',
+                            attributes: ['username']
+                        },
+                        separate: true
+                    },
+                    {
+                        model: this.db.pets,
+                        as: 'pets',
+                        separate: true
+                    },
+                    {
+                        model: this.db.stamps,
+                        as: 'stamps',
+                        separate: true
+                    }
+                ]
+            })
 
-        }).then((result) => {
-            result.buddies = new BuddyCollection(this, result.buddies)
-            result.ignores = new IgnoreCollection(this, result.ignores)
-            result.inventory = new InventoryCollection(this, result.inventory)
-            result.igloos = new IglooCollection(this, result.igloos)
-            result.furniture = new FurnitureCollection(this, result.furniture)
-            result.cards = new CardCollection(this, result.cards)
-            result.postcards = new PostcardCollection(this, result.postcards)
-            result.pets = new PetCollection(this, result.pets)
-            result.stamps = new StampCollection(this, result.stamps)
+            if (!user) {
+                return false
+            }
+
+            Object.assign(this, user.get({ plain: true }))
+
+            this.buddies = new BuddyCollection(this, user.buddies)
+            this.ignores = new IgnoreCollection(this, user.ignores)
+            this.inventory = new InventoryCollection(this, user.inventory)
+            this.igloos = new IglooCollection(this, user.igloos)
+            this.furniture = new FurnitureCollection(this, user.furniture)
+            this.cards = new CardCollection(this, user.cards)
+            this.postcards = new PostcardCollection(this, user.postcards)
+            this.pets = new PetCollection(this, user.pets)
+            this.stamps = new StampCollection(this, user.stamps)
 
             this.setPermissions()
 
             return true
 
-        }).catch((error) => {
-            //this.handler.error(error)
+        } catch (error) {
+            this.handler.error(error)
 
             return false
-        })
-    },
+        }
+    }
 
     toJSON() {
         return pick(this,
@@ -303,7 +310,3 @@ const GameUserMixin = {
     }
 
 }
-
-Object.setPrototypeOf(GameUserMixin, UserMixin)
-
-export default { ...UserMixin, ...GameUserMixin }

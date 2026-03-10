@@ -1,23 +1,10 @@
-import GameUserMixin from './GameUserMixin'
-import UserMixin from './UserMixin'
-
+import GameUser from './GameUser'
+import User from './User'
 
 export default function(server, socket) {
-    let user = server.db.buildUser()
-    let mixin
+    const userClass = server.id === 'Login'
+        ? User
+        : GameUser
 
-    switch (server.id) {
-        case 'Login':
-            mixin = UserMixin
-            break
-
-        default:
-            mixin = GameUserMixin
-            break
-    }
-
-    Object.assign(user, mixin)
-    user.init(server, socket)
-
-    return user
+    return new userClass(server, socket)
 }

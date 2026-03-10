@@ -42,6 +42,10 @@
             "maxUsers": 300
         }
     },
+    "cooldowns": {
+        "send_emote": 250,
+        "send_frame": 250
+    },
     "game": {
         "preferredSpawn": 0,
         "iglooIdOffset": 2000
